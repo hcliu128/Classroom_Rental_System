@@ -6,30 +6,23 @@ import time
 
 
 from dotenv import load_dotenv
-load_dotenv('../.env')
+load_dotenv('./.env')
 mysql_user = os.getenv('MYSQL_USER')
 mysql_password = os.getenv('MYSQL_PASSWORD')
 mysql_host = os.getenv('MYSQL_HOST')
-mysql_port = os.getenv('MYSQL_PORT')
 mysql_db = os.getenv('MYSQL_DB')
-mysql_user = 'team16'
-mysql_password = ')JTF)hwS!yjy0F6H'
-mysql_host = '140.122.184.129'
-mysql_port = 3310
-mysql_db = 'team16'
+
 
 print(f'MYSQL_USER: {mysql_user}')
 print(f'MYSQL_PASSWORD: {mysql_password}')
 print(f'MYSQL_HOST: {mysql_host}')
-print(f'MYSQL_PORT: {mysql_port}')
 print(f'MYSQL_DB: {mysql_db}')
 
 class MySQLConnection:
-    def __init__(self, user, password, host, port, database):
+    def __init__(self, user, password, host, database):
         self.user = user
         self.password = password
         self.host = host
-        self.port = port
         self.database = database
         self.connection = None
         self._connect()
@@ -44,7 +37,6 @@ class MySQLConnection:
                 user=self.user,
                 password=self.password,
                 host=self.host,
-                port=self.port,
                 database=self.database
             )
             self.connection.autocommit = True
@@ -72,12 +64,33 @@ class MySQLConnection:
         # Delegate attribute access to the real connection object
         return getattr(self.connection, name)
 
+    def get_one_data(self, query):
+        if self.connection.is_connected():
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+            self.connection.commit()
+            cursor.close()
+            return cursor.fetchone()
+        else: 
+            print("Connection to MySQL DB failed")
+    
+    def get_all_data(self, query):
+        if self.connection.is_connected():
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+            self.connection.commit()
+            cursor.close()
+            return cursor.fetchall()
+        else: 
+            print("Connection to MySQL DB failed")
+        
+
 
 connection = MySQLConnection(
     user=mysql_user,
     password=mysql_password,
     host=mysql_host,
-    port=mysql_port,
     database=mysql_db
 )
+
 

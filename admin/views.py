@@ -2,21 +2,18 @@
 from flask import render_template, request, jsonify, redirect, session, flash
 from . import admin_bp
 from datetime import datetime
-
+from app import connection
 
 @admin_bp.route("/")
 def home():
     if ('user_type' not in session or session['user_type'] != "Admin"):
         return "<script>alert('請先登入!'); window.location.href = '/auth/login';</script>";
-    from app import connection
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT user_id FROM user WHERE user_name='{session['username']}'" )
-    user_id = cursor.fetchone()[0]
+    
+    
+    user_id = connection.get_one_data()[0]
     # f"SELECT E.Event_ID, E.Info, C.Classroom_ID, U.User_ID, U.Name, U.Email, T.Start_time, T.End_time, UI.Date FROM event E JOIN usage_info UI ON E.Event_ID = UI.Event_ID JOIN time_slot T ON UI.Time_slot_ID = T.Time_slot_ID JOIN classroom C ON UI.Classroom_ID = C.Classroom_ID JOIN hold_info HI ON E.Event_ID = HI.Event_ID JOIN user U ON HI.User_ID = U.User_ID WHERE UI.Approval_Status = 'Pending';"
-    cursor.execute(f"SELECT E.Event_ID, E.Info, C.Classroom_ID, U.User_ID, U.Name, U.Email, T.time_slot_id, T.Start_time, T.End_time, UI.Date FROM event E JOIN usage_info UI ON E.Event_ID = UI.Event_ID JOIN time_slot T ON UI.Time_slot_ID = T.Time_slot_ID JOIN classroom C ON UI.Classroom_ID = C.Classroom_ID JOIN hold_info HI ON E.Event_ID = HI.Event_ID JOIN user U ON HI.User_ID = U.User_ID JOIN manage m ON m.user_id = '{user_id}' and m.classroom_id = UI.classroom_id WHERE UI.Approval_Status = 'Pending';")
+    data = connection.get_all_data(f"SELECT E.Event_ID, E.Info, C.Classroom_ID, U.User_ID, U.Name, U.Email, T.time_slot_id, T.Start_time, T.End_time, UI.Date FROM event E JOIN usage_info UI ON E.Event_ID = UI.Event_ID JOIN time_slot T ON UI.Time_slot_ID = T.Time_slot_ID JOIN classroom C ON UI.Classroom_ID = C.Classroom_ID JOIN hold_info HI ON E.Event_ID = HI.Event_ID JOIN user U ON HI.User_ID = U.User_ID JOIN manage m ON m.user_id = '{user_id}' and m.classroom_id = UI.classroom_id WHERE UI.Approval_Status = 'Pending';")
     # cursor.execute(f"SELECT E.Event_ID, Info, U.Classroom_ID, UV.User_ID, Name, Email, t.Date, Start_time, End_time  FROM Usage_Info U NATURAL JOIN Event E NATURAL JOIN User_view UV NATURAL JOIN Time_slot TS  NATURAL JOIN hold_info HI, take_info t, manage m Where t.Event_ID = e.Event_ID and U.time_slot_id = T.time_slot_id and approval_status = 'Pending' and m.user_id = '{user_id}' and m.classroom_id = u.classroom_id;")
-    data = cursor.fetchall()
-    cursor.close()
     attribute = ['Event ID', 'Info', 'Classroom ID', 'Student ID', 'Name', 'Email', 'time id', 'Start_time', 'End_time', 'Date']
     return render_template('home.html', data = data, attribute = attribute, user_name = session['username'])
 
@@ -24,34 +21,22 @@ def home():
 def add_classroom():
     if ('user_type' not in session or session['user_type'] != "Admin"):
         return "<script>alert('請先登入!'); window.location.href = '/auth/login';</script>";
-    from app import connection
-    cursor = connection.cursor()
-    cursor.execute("SELECT Classroom_ID, Campus_ID, Building_ID FROM Classroom;")
-    data = cursor.fetchall()
-    cursor.close()
+    data = connection.get_all_data("SELECT Classroom_ID, Campus_ID, Building_ID FROM Classroom;")
     return render_template('add_classroom.html', data = data)
 
 @admin_bp.route('/add_timeslot')
 def add_timeslot():
     if ('user_type' not in session or session['user_type'] != "Admin"):
         return "<script>alert('請先登入!'); window.location.href = '/auth/login';</script>";
-    from app import connection
-    cursor = connection.cursor()
-    cursor.execute("SELECT time_slot_id, start_time, end_time FROM time_slot;")
-    data = cursor.fetchall()
-    cursor.close()
+    data = connection.get_all_data("SELECT time_slot_id, start_time, end_time FROM time_slot;")
     return render_template('add_timeslot.html', data = data)
 
 @admin_bp.route('/delete_account')
 def delete_account():
     if ('user_type' not in session or session['user_type'] != "Admin"):
         return "<script>alert('請先登入!'); window.location.href = '/auth/login';</script>";
-    from app import connection
-    cursor = connection.cursor()
-    cursor.execute("SELECT Type, User_ID, Email, Phone, Name, User_name FROM user;")
-    data = cursor.fetchall()
+    data = connection.get_all_data("SELECT Type, User_ID, Email, Phone, Name, User_name FROM user;")
     attribute = ["Role", "User_ID", "Email", "Phone", "Name", "User_name"]
-    cursor.close()
     return render_template('delete_account.html', data = data, attribute = attribute)
 
 @admin_bp.route("/update_status", methods = ['POST'])
