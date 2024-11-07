@@ -11,19 +11,22 @@ mysql_user = os.getenv('MYSQL_USER')
 mysql_password = os.getenv('MYSQL_PASSWORD')
 mysql_host = os.getenv('MYSQL_HOST')
 mysql_db = os.getenv('MYSQL_DB')
+mysql_port = os.getenv('MYSQL_PORT')
 
 
 print(f'MYSQL_USER: {mysql_user}')
 print(f'MYSQL_PASSWORD: {mysql_password}')
 print(f'MYSQL_HOST: {mysql_host}')
 print(f'MYSQL_DB: {mysql_db}')
+print(f'MYSQL_PORT: {mysql_port}')
 
 class MySQLConnection:
-    def __init__(self, user, password, host, database):
+    def __init__(self, user, password, host, port, database):
         self.user = user
         self.password = password
         self.host = host
         self.database = database
+        self.port = port
         self.connection = None
         self._connect()
 
@@ -66,7 +69,7 @@ class MySQLConnection:
 
     def get_one_data(self, query):
         if self.connection.is_connected():
-            cursor = self.connection.cursor()
+            cursor = self.connection.cursor(buffered=True)
             cursor.execute(query)
             self.connection.commit()
             cursor.close()
@@ -76,7 +79,7 @@ class MySQLConnection:
     
     def get_all_data(self, query):
         if self.connection.is_connected():
-            cursor = self.connection.cursor()
+            cursor = self.connection.cursor(buffered=True)
             cursor.execute(query)
             self.connection.commit()
             cursor.close()
@@ -84,13 +87,22 @@ class MySQLConnection:
         else: 
             print("Connection to MySQL DB failed")
         
+    def execute_query(self, query):
+        if self.connection.is_connected():
+            cursor = self.connection.cursor(buffered=True)
+            cursor.execute(query)
+            self.connection.commit()
+            cursor.close()
+        else: 
+            print("Connection to MySQL DB failed")
 
 
 connection = MySQLConnection(
     user=mysql_user,
     password=mysql_password,
     host=mysql_host,
-    database=mysql_db
+    database=mysql_db,
+    port=mysql_port
 )
 
 

@@ -2,18 +2,15 @@
 from flask import render_template, request, jsonify, redirect, session, flash
 from . import admin_bp
 from datetime import datetime
-from app import connection
+
 
 @admin_bp.route("/")
 def home():
     if ('user_type' not in session or session['user_type'] != "Admin"):
         return "<script>alert('請先登入!'); window.location.href = '/auth/login';</script>";
-    
-    
-    user_id = connection.get_one_data()[0]
-    # f"SELECT E.Event_ID, E.Info, C.Classroom_ID, U.User_ID, U.Name, U.Email, T.Start_time, T.End_time, UI.Date FROM event E JOIN usage_info UI ON E.Event_ID = UI.Event_ID JOIN time_slot T ON UI.Time_slot_ID = T.Time_slot_ID JOIN classroom C ON UI.Classroom_ID = C.Classroom_ID JOIN hold_info HI ON E.Event_ID = HI.Event_ID JOIN user U ON HI.User_ID = U.User_ID WHERE UI.Approval_Status = 'Pending';"
+    from app import connection
+    user_id = connection.get_one_data(f"SELECT user_id FROM user WHERE user_name='{session['username']}'" )[0]
     data = connection.get_all_data(f"SELECT E.Event_ID, E.Info, C.Classroom_ID, U.User_ID, U.Name, U.Email, T.time_slot_id, T.Start_time, T.End_time, UI.Date FROM event E JOIN usage_info UI ON E.Event_ID = UI.Event_ID JOIN time_slot T ON UI.Time_slot_ID = T.Time_slot_ID JOIN classroom C ON UI.Classroom_ID = C.Classroom_ID JOIN hold_info HI ON E.Event_ID = HI.Event_ID JOIN user U ON HI.User_ID = U.User_ID JOIN manage m ON m.user_id = '{user_id}' and m.classroom_id = UI.classroom_id WHERE UI.Approval_Status = 'Pending';")
-    # cursor.execute(f"SELECT E.Event_ID, Info, U.Classroom_ID, UV.User_ID, Name, Email, t.Date, Start_time, End_time  FROM Usage_Info U NATURAL JOIN Event E NATURAL JOIN User_view UV NATURAL JOIN Time_slot TS  NATURAL JOIN hold_info HI, take_info t, manage m Where t.Event_ID = e.Event_ID and U.time_slot_id = T.time_slot_id and approval_status = 'Pending' and m.user_id = '{user_id}' and m.classroom_id = u.classroom_id;")
     attribute = ['Event ID', 'Info', 'Classroom ID', 'Student ID', 'Name', 'Email', 'time id', 'Start_time', 'End_time', 'Date']
     return render_template('home.html', data = data, attribute = attribute, user_name = session['username'])
 
@@ -43,14 +40,9 @@ def delete_account():
 def update_status():
     data = request.get_json()
     try:
-        from utils.db import connection
-        cursor = connection.cursor()
         reason = data.get('reason', None)
         print(f"{data['status']} & {reason} & {data['date']}")
-        query = f"UPDATE usage_info SET approval_status = '{data['status']}', approval_message = '{reason}' WHERE event_id = {int(data['eid'])} and time_slot_id = {int(data['time_slot_id'])} and date = '{data['date']}'"
-        cursor.execute(query)
-        connection.commit()
-        cursor.close()
+        connection.execute_query(f"UPDATE usage_info SET approval_status = '{data['status']}', approval_message = '{reason}' WHERE event_id = {int(data['eid'])} and time_slot_id = {int(data['time_slot_id'])} and date = '{data['date']}'")
         return jsonify({'success': True})
     except:
         return jsonify({'error': 'Database update failed'}), 500
@@ -58,16 +50,10 @@ def update_status():
 @admin_bp.route("/submit_timeslot", methods = ['POST'])
 def submit_timeslot():
     try:
-        from utils.db import connection
-        cursor = connection.cursor()
-        cursor.execute("SELECT MAX(time_slot_id) FROM time_slot;")
-        current_id = cursor.fetchone()[0]
+        current_id = connection.get_one_data("SELECT MAX(time_slot_id) FROM time_slot;")[0]
         start_time = request.form['start_time'] + ':00'
         end_time = request.form['end_time'] + ':00'
-        query = f"INSERT INTO time_slot VALUES ({int(current_id) + 1}, '{start_time}',  '{end_time}');"
-        cursor.execute(query)
-        connection.commit()
-        cursor.close()
+        connection.execute_query(f"INSERT INTO time_slot VALUES ({int(current_id) + 1}, '{start_time}',  '{end_time}');")
     except Exception as e:
         print(e)
         return jsonify({"status": "fail", "message": str(e)}), 500
@@ -76,20 +62,13 @@ def submit_timeslot():
 @admin_bp.route("/submit_classroom", methods = ['POST'])
 def submit_classroom():
     try:
-        from utils.db import connection
-        cursor = connection.cursor()
-        cursor.execute(f"INSERT INTO classroom VALUES ('{request.form['classroom_ID']}', '{request.form['campus_ID']}', '{request.form['building_ID']}');")
+        connection.execute_query(f"INSERT INTO classroom VALUES ('{request.form['classroom_ID']}', '{request.form['campus_ID']}', '{request.form['building_ID']}');")
+        user_id = connection.get_one_data(f"SELECT user_id FROM user WHERE user_name='{session['username']}'" )[0]
+        connection.execute_query(f"INSERT INTO manage (classroom_id, user_id) VALUES ('{request.form['classroom_ID']}', '{user_id}');")
         connection.commit()
-        cursor.execute(f"SELECT user_id FROM user WHERE user_name='{session['username']}'" )
-        user_id = cursor.fetchone()[0]
-        cursor.execute(f"INSERT INTO manage (classroom_id, user_id) VALUES ('{request.form['classroom_ID']}', '{user_id}');")
-        connection.commit()
-        cursor.execute(f"INSERT INTO Price (classroom_id, role, fee) VALUES ('{request.form['classroom_ID']}', 'Guest', '{request.form['guestfee']}');")
-        cursor.execute(f"INSERT INTO Price (classroom_id, role, fee) VALUES ('{request.form['classroom_ID']}', 'Teacher', '{request.form['teacherfee']}');")
-        cursor.execute(f"INSERT INTO Price (classroom_id, role, fee) VALUES ('{request.form['classroom_ID']}', 'Student', '{request.form['studentfee']}');")
-        connection.commit()
-        
-        cursor.close()
+        connection.execute_query(f"INSERT INTO Price (classroom_id, role, fee) VALUES ('{request.form['classroom_ID']}', 'Guest', '{request.form['guestfee']}');")
+        connection.execute_query(f"INSERT INTO Price (classroom_id, role, fee) VALUES ('{request.form['classroom_ID']}', 'Teacher', '{request.form['teacherfee']}');")
+        connection.execute_query(f"INSERT INTO Price (classroom_id, role, fee) VALUES ('{request.form['classroom_ID']}', 'Student', '{request.form['studentfee']}');")
     except Exception as e:
         print(e)
     return "<script>alert('新增完成!'); window.location.href = '/admin';</script>";
@@ -98,25 +77,13 @@ def submit_classroom():
 def delete_user():
     data = request.get_json()
     try:
-        from utils.db import connection
-        cursor = connection.cursor()
-        query = f"DELETE FROM User WHERE user_id = '{data['user_id']}'"
-        cursor.execute(query)
-        connection.commit()
-        cursor.close()
+        connection.execute_query(f"DELETE FROM User WHERE user_id = '{data['user_id']}'")
         return jsonify({'success': True})
     except:
         return jsonify({'error': 'Database update failed'}), 500
 
-
-
-
-
-
-
 from utils.time import *
 from utils.db import connection
-
 
 @admin_bp.route('/submit_lend', methods=['POST'])
 def submit_lend():

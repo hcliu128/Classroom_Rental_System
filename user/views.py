@@ -175,15 +175,17 @@ def add_reservation():
 
     cur.close()
 
+    ret_dict = {'rooms': classrooms,
+        'time_slots': time_slots,
+        'week_dates': week_dates,
+        'availability': availability,
+        'base_date': base_date.strftime('%Y-%m-%d'),
+        'roomSel': roomSel,
+        'event_ids': event_ids}
+
     return render_template(
         'calendar.html',
-        rooms=classrooms,
-        time_slots=time_slots,
-        week_dates=week_dates,
-        availability=availability,
-        base_date=base_date.strftime('%Y-%m-%d'),
-        roomSel=roomSel,
-        event_ids=event_ids
+        ret_dict=ret_dict
     )
 
 
@@ -241,8 +243,8 @@ def manage_reservation():
 
     results = cur.fetchall()
     availability = []
-    herf_names = {}
-    herf_parms = {}
+    href_names = {}
+    href_parms = {}
     for result in results:
         classroom = result[0]
         date = result[1].strftime('%Y-%m-%d')
@@ -255,24 +257,27 @@ def manage_reservation():
         #     continue
         time_slot_str = f"{start_time} - {end_time}"
         availability.append((classroom, date, time_slot_str))
-        herf_names[(classroom, date, time_slot_str)] = f'{event_id}:{info}'
-        herf_parms[(classroom, date, time_slot_str)] = f'?event_id={event_id}'
+        href_names[(classroom, date, time_slot_str)] = f'{event_id}:{info}'
+        href_parms[(classroom, date, time_slot_str)] = f'?event_id={event_id}'
 
 
     cur.close()
 
+    ret_dict = {
+        'rooms': classrooms,
+        'time_slots': time_slots,
+        'week_dates': week_dates,
+        'availability': availability,
+        'base_date': base_date.strftime('%Y-%m-%d'),
+        'roomSel': roomSel,
+        'href': 'user.edit_reservation',
+        'href_names': href_names,
+        'href_parms': href_parms
+    }
 
     return render_template(
         'calendar.html',
-        rooms=classrooms,
-        time_slots=time_slots,
-        week_dates=week_dates,
-        availability=availability,
-        base_date=base_date.strftime('%Y-%m-%d'),
-        roomSel=roomSel,
-        herf='user.edit_reservation',
-        herf_names=herf_names,
-        herf_parms=herf_parms
+        ret_dict=ret_dict
     )
 
 
@@ -282,7 +287,7 @@ def edit_reservation():
         event_id = request.form['event_id']
         action = request.form['action']
 
-        event_id = request.args.get('event_id', '1')
+        event_id = request.args.get('event_id', '-1')
 
         cur = connection.cursor(buffered=True)
 

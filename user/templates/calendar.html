@@ -19,7 +19,7 @@
 
         function changeWeek(offset) {
             const params = new URLSearchParams(window.location.search);
-            const current_date_str = params.get('date') || "{{ week_dates[3] }}";
+            const current_date_str = params.get('date') || "{{ ret_dict['week_dates'][3] }}";
             const current_date = new Date(current_date_str);
             current_date.setDate(current_date.getDate() + offset);
             const new_date_str = current_date.toISOString().split('T')[0];
@@ -73,17 +73,17 @@
             <div class="px-4 py-5 sm:px-6">
                 <label for="roomSel" class="block text-sm font-medium text-gray-700">教室:</label>
                 <select id="roomSel" name="roomSel" onchange="updateRoom()">
-                    {% for room in rooms %}
-                        <option value="{{ room }}" {% if room == roomSel %}selected{% endif %}>{{ room }}</option>
+                    {% for room in ret_dict.rooms %}
+                        <option value="{{ room }}" {% if room == ret_dict.roomSel %}selected{% endif %}>{{ room }}</option>
                     {% endfor %}
                 </select>
             </div>
             <!-- 標籤活動 -->
-            {% if event_ids %}
+            {% if ret_dict.event_ids %}
             <div class="px-4 py-5 sm:px-6">
                 <label for="eventSel" class="block text-sm font-medium text-gray-700">活動:</label>
                 <select id="eventSel" name="eventSel">
-                    {% for event in event_ids %}
+                    {% for event in ret_dict.event_ids %}
                         <option value="{{ event }}">{{ event }}</option>
                     {% endfor %}
                 </select>
@@ -93,23 +93,23 @@
                 <dl>
                     <div class="bg-gray-50 px-4 py-5 grid grid-cols-8 gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">時段</dt>
-                        {% for date in week_dates %}
+                        {% for date in ret_dict.week_dates %}
                             <dt class="text-sm font-medium text-gray-500">{{ date.strftime('%a(%m/%d)') }}</dt>
                         {% endfor %}
                     </div>
-                    {% for time_slot in time_slots %}
+                    {% for time_slot in ret_dict.time_slots %}
                         <div class="bg-white px-4 py-5 grid grid-cols-8 gap-4 sm:grid-cols-8 sm:gap-4 sm:px-6">
                             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
                                 {{ time_slot }}
                             </dd>
-                            {% for date in week_dates %}
+                            {% for date in ret_dict.week_dates %}
                                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
-                                    {% set key = (roomSel, date.strftime('%Y-%m-%d'), time_slot) %}
-                                    {% if key in availability %}
-                                        {% if herf %}
-                                            {% set url = url_for(herf) + herf_parms[key] %}
+                                    {% set key = (ret_dict.roomSel, date.strftime('%Y-%m-%d'), time_slot) %}
+                                    {% if key in ret_dict.availability %}
+                                        {% if ret_dict.href %}
+                                            {% set url = url_for(ret_dict.href) + ret_dict.href_parms[key] %}
                                             <a href="{{ url }}">
-                                                {{ herf_names[key] }}
+                                                {{ ret_dict.href_names[key] }}
                                             </a>
                                         {% else %}
                                             <input type="checkbox" value='{{ {"time_slot": time_slot, "date": date.strftime("%Y-%m-%d")}|tojson }}'>
@@ -133,7 +133,7 @@
         <button onclick="changeWeek(7)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             下一週
         </button>
-        {% if not herf %}
+        {% if not ret_dict.href %}
         <button onclick="submitForm()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
             提交
         </button>
