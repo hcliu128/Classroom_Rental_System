@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>預約教室</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-6">編輯與顯示預約</h1>
+    <form action="#" method="POST">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2">
+          教室名稱與時段
+        </label>
+
+        <!-- 動態生成預約教室資料表格 -->
+        <table class="min-w-full bg-white border-collapse">
+          <thead>
+            <tr>
+              <th class="border-b-2 border-gray-300 py-2 px-4 text-left">教室</th>
+              <th class="border-b-2 border-gray-300 py-2 px-4 text-left">日期</th>
+              <th class="border-b-2 border-gray-300 py-2 px-4 text-left">時段</th>
+              <th class="border-b-2 border-gray-300 py-2 px-4 text-left">狀態</th>
+              <th class="border-b-2 border-gray-300 py-2 px-4 text-left">審核訊息</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for classroom, dates in classroom_data.items() %}
+              {% for date, times in dates.items() %}
+                {% for time in times %}
+                <tr>
+                  <td class="border-b border-gray-300 py-2 px-4 text-blue-600 font-semibold">{{ classroom }}</td>
+                  <td class="border-b border-gray-300 py-2 px-4">{{ date }}</td>
+                  <td class="border-b border-gray-300 py-2 px-4">{{ time }}</td>
+                  <td class="border-b border-gray-300 py-2 px-4">
+                    {% if approval_status_data[classroom][date][time] == 'Accept' %}
+                    <span class="text-green-600">成功</span>
+                    {% elif approval_status_data[classroom][date][time] == 'Wait_For_Payment' %}
+                    <span class="text-yellow-600">等待付款</span>
+                    {% elif approval_status_data[classroom][date][time] == 'Pending' %}
+                    <span class="text-orange-600">等待審核</span>
+                    {% elif approval_status_data[classroom][date][time] == 'Cancel' %}
+                    <span class="text-red-600">取消</span>
+                    {% elif approval_status_data[classroom][date][time] == 'Decline' %}
+                    <span class="text-gray-600">拒絕</span>
+                    {% endif %}
+                </td>
+                  <td class="border-b border-gray-300 py-2 px-4">{{ approval_message_data[classroom][date][time] }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2">
+          活動資訊
+        </label>
+        <input type="text" value="{{ event_info }}" readonly class="block appearance-none w-full bg-gray-100 border border-gray-400 px-4 py-2 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+      </div>
+
+      <!-- <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2">
+          預約狀態
+        </label>
+        <input type="text" value="{{ approval_status }}" readonly class="block appearance-none w-full bg-gray-100 border border-gray-400 px-4 py-2 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+      </div> -->
+
+      <!-- <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2">
+          審核訊息
+        </label>
+        <input type="text" value="{{ approval_message }}" readonly class="block appearance-none w-full bg-gray-100 border border-gray-400 px-4 py-2 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+      </div> -->
+
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2">
+          待付款金額
+        </label>
+        <input type="text" value="NT$ {{ total_cost }}" readonly class="block appearance-none w-full bg-gray-100 border border-gray-400 px-4 py-2 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+      </div>
+
+      <div class="flex items-center justify-between">
+
+        <form method="POST">
+          <input type="hidden" name="action" value="Cancel">
+          <input type="hidden" name="event_id" value="{{ event_id }}">
+          <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+              取消預約
+          </button>
+        </form>
+
+        <a href="{{ url_for('user.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+          回首頁
+        </a>
+        {% if total_cost > 0 %}
+        <form method="POST">
+          <input type="hidden" name="action" value="Accept">
+          <input type="hidden" name="event_id" value="{{ event_id }}">
+          <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+            付款
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</body>
+</html>

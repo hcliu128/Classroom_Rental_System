@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block h1 %}Welcome to Admin Dashboard, {{user_name}}{% endblock %}
+{% block title %}Home - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="requests">
+    <div class="max-w-12xl mx-auto p-4 bg-white shadow-md rounded-md">
+        <div class="panel-heading mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Pending List</h3>
+        </div>
+        <div class="panel-body">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            {% for i in attribute %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {{ i }}
+                                </th>
+                            {% endfor %}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for i in data %}
+                            <tr id="row-{{ i[0] }}-{{ i[6] }}">
+                                {% for j in i %}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ j }}</td>
+                                {% endfor %}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button class="text-white bg-green-500 hover:bg-green-600 font-bold py-2 px-4 rounded" onclick="updateStatus('{{ i[0] }}', '{{ i[6] }}', '{{ i[9] }}', 'Wait_For_Payment')">Approve</button>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button class="text-white bg-red-500 hover:bg-red-600 font-bold py-2 px-4 rounded" onclick="updateStatus('{{ i[0] }}', '{{ i[6] }}', '{{ i[9] }}', 'Decline')">Decline</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function updateStatus(event_id, time_slot_id, date, status){
+        if (status === 'Decline') {
+            var reason = prompt("(必填)請輸入拒絕的原因:");
+            if (!reason) {
+                alert("請填寫拒絕原因。");
+                return;
+            }
+        }
+        $.ajax({
+            url : '/admin/update_status',
+            type : 'POST',
+            data : JSON.stringify({eid: event_id, time_slot_id:time_slot_id, date: date, status: status, reason: reason}),
+            contentType : 'application/json',
+            success : function(response){
+                // console.log('update success:', response)
+                $('#row-' + event_id + '-' + time_slot_id).each(function() {
+                    $(this).remove(); //bug here
+                });
+                alert("批准成功!");
+                location.reload();
+            },
+            error : function(response){
+                console.log('update fail:', response)
+            }
+
+        });
+    }
+</script>
+{% endblock %}
+
+{% block list %}
+<ul class="space-y-4">
+    <li>
+        <a href="{{ url_for('admin.add_timeslot') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">新增預訂時段</a>
+    </li>
+    <li>
+        <a href="{{ url_for('admin.add_classroom') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">新增教室</a>
+    </li>
+    <li>
+        <a href="{{ url_for('admin.delete_account') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">刪除使用者帳號</a>
+    </li>
+    <li>
+        <a href="{{ url_for('admin.add_lend') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">新增借出教室</a>
+    </li>
+</ul>
+{% endblock %}

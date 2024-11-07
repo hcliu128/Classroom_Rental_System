@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block h1 %}新增時間區段{% endblock %}
+{% block title %}Admin - Adding Time Slot{% endblock %}
+
+{% block content %}
+<div class="requests">
+    <div class="max-w-10xl mx-auto p-4 bg-white shadow-md rounded-md">
+        <div class="panel-heading mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">目前已有時段</h3>
+        </div>
+        <div class="panel-body">
+            <div class="overflow-x-auto">
+                <h2></h2>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">時段id</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">開始時間</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">結束時間</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for i in data %}
+                            <tr id="row-{{ i[0] }}">
+                                {% for j in i %}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ j }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        
+    </div>
+</div>
+<br>
+<div class="max-w-lg mx-auto bg-white p-8 shadow-md rounded">
+    <h2 class="text-2xl font-bold mb-4">提交規定</h2>
+    <p class="mb-4">請填寫以下開始和結束時間，並點擊提交按鈕進行提交。點擊取消返回管理頁面。<br>請注意:開始及結束時間之間隔需要達到30分鐘</p>
+    <form onsubmit="return validateTime();" action="{{ url_for('admin.submit_timeslot')}}" method="post">
+        <div class="mb-4">
+            <label for="start_time" class="block text-gray-700 font-bold mb-2">開始時間</label>
+            <input type="time" id="start_time" name="start_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="mb-4">
+            <label for="end_time" class="block text-gray-700 font-bold mb-2">結束時間</label>
+            <input type="time" id="end_time" name="end_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="flex justify-between">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">提交</button>
+            <button type="button" onclick="window.location.href='/admin'" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">取消</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function validateTime() {
+        var startTime = document.getElementById('start_time').value;
+        var endTime = document.getElementById('end_time').value;
+        
+        if (!startTime || !endTime) {
+            alert("開始時間與結束時間不能為空");
+            return false;
+        }
+
+        var today = new Date().toISOString().split('T')[0]; 
+        var startDateTime = new Date(today + 'T' + startTime + ':00');
+        var endDateTime = new Date(today + 'T' + endTime + ':00');
+
+        var timeDiff = endDateTime - startDateTime;
+        if (timeDiff < 30 * 60 * 1000) {
+            var errorMessage = document.getElementById('error-message');
+            alert('開始時間和結束時間之間的間隔必須超過30分鐘。');
+            return false; 
+        }
+
+        return true;
+    }
+</script>
+{% endblock %}

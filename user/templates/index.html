@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首頁</title>
+    <!-- 包含 TailwindCSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto p-4">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600">歡迎來到首頁</h1>
+            <div class="flex items-center space-x-4 text-lg">
+                <span><span class="font-semibold">用戶名：</span>{{ username }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="px-4 py-2 bg-red-500 text-white rounded shadow hover:bg-red-600">登出</a>
+            </div>
+        </div>
+        <ul class="space-y-4">
+            <li>
+                <a href="{{ url_for('user.add_reservation') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">新增預訂</a>
+            </li>
+            <li>
+                <a href="{{ url_for('user.manage_reservation') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">管理預訂</a>
+            </li>
+            <li>
+                <a href="{{ url_for('user.view_all_events') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">查看所有活動</a>
+            </li>
+            <li>
+                <a href="{{ url_for('user.add_event') }}" class="block p-4 bg-white rounded shadow hover:bg-blue-100">新增活動</a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

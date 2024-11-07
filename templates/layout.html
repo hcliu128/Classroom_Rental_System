@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Flask App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>國立臺灣師範大學 教室借用暨查詢系統</h1>
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <!--<h2>Sidebar</h2>-->
+            <ul>
+                <li><a href="{{ url_for('index') }}">首頁</a></li>
+                {% block sidebar_links %}{% endblock %}
+            </ul>
+        </aside>
+        
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <footer>
+        <p>&copy; 2024 資料庫理論第16組 All rights reserved.</p>
+    </footer>
+</body>
+</html>

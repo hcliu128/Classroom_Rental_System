@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加活動</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        textarea {
+            width: 300px;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px;
+            resize: none;
+        }
+        button, .button-link {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover, .button-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <form action="{{ url_for('user.add_event') }}" method="post">
+        <h1 style="text-align:center;">添加新活動</h1>
+        <div>
+            <label for="event_info">活動描述:</label>
+            <textarea id="event_info" name="event_info" required></textarea>
+        </div>
+        <div style="text-align: center;">
+            <button type="submit">提交</button>
+            <!-- 返回按鈕 -->
+            <a href="{{ url_for('user.index') }}" class="button-link">返回</a>
+        </div>
+    </form>
+</body>
+</html>

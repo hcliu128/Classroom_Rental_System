@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+    </style>
+    <script>
+        function updateRoom() {
+            let roomSel = document.getElementById("roomSel").value;
+            let params = new URLSearchParams(window.location.search);
+            params.set('roomSel', roomSel);
+            window.location.search = params.toString();
+        }
+
+        function changeWeek(offset) {
+            const params = new URLSearchParams(window.location.search);
+            const current_date_str = params.get('date') || "{{ week_dates[3] }}";
+            const current_date = new Date(current_date_str);
+            current_date.setDate(current_date.getDate() + offset);
+            const new_date_str = current_date.toISOString().split('T')[0];
+            params.set('date', new_date_str);
+            window.location.search = params.toString();
+        }
+
+        async function submitForm() {
+            let selectedSlots = [];
+            let checkboxes = document.querySelectorAll('input[type=checkbox]:checked');
+            let roomSel = document.getElementById("roomSel").value;
+
+            for (let i = 0; i < checkboxes.length; i++) {
+                selectedSlots.push(JSON.parse(checkboxes[i].value));
+            }
+
+            const data = {
+                room: roomSel,
+                slots: selectedSlots,
+            };
+
+            console.log(data)
+
+            try {
+                const response = await fetch("{{ url_for('admin.submit_lend') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                alert('提交成功！回應：' + JSON.stringify(result));
+                location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('提交失敗，請重試');
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <!-- 標籤教室 -->
+            <div class="px-4 py-5 sm:px-6">
+                <label for="roomSel" class="block text-sm font-medium text-gray-700">教室:</label>
+                <select id="roomSel" name="roomSel" onchange="updateRoom()">
+                    {% for room in rooms %}
+                        <option value="{{ room }}" {% if room == roomSel %}selected{% endif %}>{{ room }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- 標籤活動 -->
+            {% if event_ids %}
+            <div class="px-4 py-5 sm:px-6">
+                <label for="eventSel" class="block text-sm font-medium text-gray-700">活動:</label>
+                <select id="eventSel" name="eventSel">
+                    {% for event in event_ids %}
+                        <option value="{{ event }}">{{ event }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-gray-50 px-4 py-5 grid grid-cols-8 gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">時段</dt>
+                        {% for date in week_dates %}
+                            <dt class="text-sm font-medium text-gray-500">{{ date.strftime('%a(%m/%d)') }}</dt>
+                        {% endfor %}
+                    </div>
+                    {% for time_slot in time_slots %}
+                        <div class="bg-white px-4 py-5 grid grid-cols-8 gap-4 sm:grid-cols-8 sm:gap-4 sm:px-6">
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+                                {{ time_slot }}
+                            </dd>
+                            {% for date in week_dates %}
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-1">
+                                    {% set key = (roomSel, date.strftime('%Y-%m-%d'), time_slot) %}
+                                    {% if key in availability %}
+                                        {% if herf %}
+                                            {% set url = url_for(herf) + herf_parms[key] %}
+                                            <a href="{{ url }}">
+                                                {{ herf_names[key] }}
+                                            </a>
+                                        {% else %}
+                                            <input type="checkbox" value='{{ {"time_slot": time_slot, "date": date.strftime("%Y-%m-%d")}|tojson }}'>
+                                        {% endif %}
+                                    {% endif %}
+                                </dd>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="flex justify-center space-x-4 mt-4">
+        <a href="{{ url_for('admin.home') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+            回首頁
+        </a>
+        <button onclick="changeWeek(-7)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            上一週
+        </button>
+        <button onclick="changeWeek(7)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            下一週
+        </button>
+        {% if not herf %}
+        <button onclick="submitForm()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            提交
+        </button>
+        {% endif %}
+    </div>
+</body>
+</html>

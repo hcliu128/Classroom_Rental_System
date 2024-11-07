@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Classroom Schedule</title>
+</head>
+<body>
+    <h1>Classroom Time Slots</h1>
+    <table border="1">
+        <tr>
+            <th>Time Slot ID</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+        </tr>
+        {% for slot in time_slots %}
+        <tr>
+            <td>{{ slot[0] }}</td>
+            <td>{{ slot[1] }}</td>
+            <td>{{ slot[2] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

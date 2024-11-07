@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block title %}register{% endblock %}
+
+{% block sidebar_links %}
+<li><a href="{{ url_for('auth.register') }}">註冊</a></li>
+<li><a href="{{ url_for('auth.login') }}">登入</a></li>
+<li><a href="{{ url_for('auth.forgot_password') }}">忘記密碼</a></li>
+<li><a href="{{ url_for('auth.tutorial') }}">使用說明</a></li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .instructions-container {
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+    }
+    .instructions-box {
+        background-color: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        max-width: 1800px;
+        width: 70%;
+        box-sizing: border-box;
+    }
+    .instructions-box h2 {
+        margin: 0 0 20px 0;
+        font-size: 2.5em; /* 增大標題字體大小 */
+        text-align: center;
+        border-bottom: 2px solid #ff6f61;
+        padding-bottom: 10px;
+    }
+    .instructions-box p {
+        font-size: 1.5em; /* 增大段落字體大小 */
+        line-height: 1.8em; /* 增加行距 */
+        margin-bottom: 30px; /* 增加段落間距 */
+    }
+    .instructions-box ul {
+        font-size: 1.5em; /* 增大列表字體大小 */
+        line-height: 1.8em; /* 增加行距 */
+        margin-bottom: 30px; /* 增加列表間距 */
+        padding-left: 40px;
+    }
+    .instructions-box ul li {
+        margin-bottom: 20px; /* 增加列表項間距 */
+    }
+    .instructions-box ul li strong {
+        color: #ff6f61;
+    }
+</style>
+
+<div class="instructions-container">
+    <div class="instructions-box">
+        <h2>使用說明</h2>
+        <p>歡迎使用教室借用暨查詢系統！以下是幫助您快速上手的使用說明，：</p>
+        <ul>
+            <li><strong>註冊帳號：</strong> 點擊“註冊”按鈕，填寫資訊並提交表單，即可完成註冊。</li>
+            <li><strong>登入系統：</strong> 點擊“登入”按鈕，輸入您的帳號名稱和密碼，即可登入系統。</li>
+            <li><strong>忘記密碼：</strong> 如果您忘記了密碼，可以點擊“忘記密碼”按鈕重置您的密碼。</li>
+            <li><strong>查看最新消息：</strong> 點擊“最新消息”分頁，查看系統的更新和公告。</li>
+            <li><strong>查詢教室：</strong> 您可以在登入後查詢教室的使用情況。</li>
+            <li><strong>借用教室：</strong> 您可以通過系統提交空閒教室的借用申請。</li>
+        </ul>
+        <p>如果您在使用過程中遇到任何問題，歡迎聯繫我們： <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="color: #ff6f61; text-decoration: none;">資料庫理論第十六組</a></p>
+    </div>
+</div>
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+{% endblock %}

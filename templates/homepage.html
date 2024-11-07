@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block title %}Home page{% endblock %}
+
+{% block sidebar_links %}
+<li><a href="{{ url_for('auth.register') }}">註冊</a></li>
+<li><a href="{{ url_for('auth.login') }}">登入</a></li>
+<li><a href="{{ url_for('news') }}">最新消息</a></li>
+<li><a href="{{ url_for('about') }}">關於我們</a></li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        background-color: #ff6f61;
+        color: white;
+        padding: 50px 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+    .hero h2 {
+        font-size: 2.5em;
+        margin: 0;
+    }
+    .hero p {
+        font-size: 1.2em;
+        margin: 10px 0 0 0;
+    }
+    .features {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .feature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* 垂直居中 */
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        text-align: center; /* 确保文字水平居中 */
+    }
+    .feature img {
+        max-width: 70%;
+        max-height: 300px;
+        width: auto;
+        height: auto;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .feature h3, .feature p {
+        margin: 0;
+        display: flex;
+        align-items: center; /* 垂直居中 */
+        text-align: center; /* 确保文字水平居中 */
+    }
+</style>
+
+<div class="hero">
+    <h2>輕鬆查詢，快速預訂</h2>
+    <p>讓我們幫助您找到最佳的教室</p>
+</div>
+<div class="features">
+    <div class="feature">
+        <img src="{{ url_for('static', filename='images/Fast_search.jpeg') }}" alt="快速搜尋">
+    </div>
+    <div class="feature">
+        <h1>快速搜尋</h1>
+        <p>使用我們的系統，您可以快速搜尋到合適的教室。</p>
+    </div>
+    <div class="feature">
+        <h1>即時預訂</h1>
+        <p>立即預訂您所需的教室，不再等待。</p>
+    </div>
+    <div class="feature">
+        <img src="{{ url_for('static', filename='images/Real_time_preserve.jpeg') }}" alt="即時預訂">
+    </div>
+    <div class="feature">
+        <img src="{{ url_for('static', filename='images/User_friendly.jpeg') }}" alt="使用者友好">
+    </div>
+    <div class="feature">
+        <h1>使用者友好</h1>
+        <p>我們的界面簡單易用，任何人都能輕鬆上手。</p>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+{% endblock %}

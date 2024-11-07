@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+
+{% block title %}最新消息{% endblock %}
+
+{% block sidebar_links %}
+<li><a href="{{ url_for('auth.register') }}">註冊</a></li>
+<li><a href="{{ url_for('auth.login') }}">登入</a></li>
+<li><a href="{{ url_for('news') }}">最新消息</a></li>
+<li><a href="{{ url_for('about') }}">關於我們</a></li>
+{% endblock %}
+
+
+
+{% block content %}
+<style>
+    .news-item {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .news-item h2 {
+        font-size: 2em;
+        margin: 0;
+    }
+    .news-item p {
+        font-size: 1.2em;
+        margin: 10px 0 0 0;
+    }
+    .news-item .date {
+        font-size: 0.9em;
+        color: gray;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="news">
+    <div class="news-item">
+        <h2>教室也會迷路？</h2>
+        <p class="date">2024-06-01</p>
+        <p>今天早上，有一間教室自己走到了行政大樓，我們正努力尋找它的主人。</p>
+    </div>
+    <div class="news-item">
+        <h2>茶水間變成了舞池</h2>
+        <p class="date">2024-06-02</p>
+        <p>昨晚有學生在茶水間舉辦了一場即興舞會，我們不得不提醒大家，舞池應該留在多功能廳。</p>
+    </div>
+    <div class="news-item">
+        <h2>自習室的神秘歌聲</h2>
+        <p class="date">2024-06-03</p>
+        <p>有學生反映，在晚上自習室經常傳來神秘的歌聲，經調查發現是清潔工阿姨在唱歌提神。</p>
+    </div>
+    <div class="news-item">
+        <h2>教室桌椅的排位戰爭</h2>
+        <p class="date">2024-06-04</p>
+        <p>今天早上，我們發現教室內的桌椅全都重新排列，原來是昨晚的桌椅排位比賽結果。</p>
+    </div>
+    <div class="news-item">
+        <h2>空調與暖氣的較量</h2>
+        <p class="date">2024-06-05</p>
+        <p>本週，空調與暖氣進行了一場誰更涼爽的較量，最終空調勝出，但暖氣表示不服，下週將再次挑戰。</p>
+    </div>
+    <div class="news-item">
+        <h2>白板筆的消失之謎</h2>
+        <p class="date">2024-06-06</p>
+        <p>白板筆經常神秘消失，經調查發現，原來是學生們喜歡把它們當作魔杖使用。</p>
+    </div>
+    <div class="news-item">
+        <h2>課桌上的藝術展</h2>
+        <p class="date">2024-06-07</p>
+        <p>我們發現有學生在課桌上進行藝術創作，目前正在策劃一場課桌藝術展覽。</p>
+    </div>
+    <div class="news-item">
+        <h2>講台上的小動物</h2>
+        <p class="date">2024-06-08</p>
+        <p>今天早上，講台上出現了一隻小貓，經查詢，原來是某位老師的寵物跑到了教室裡。</p>
+    </div>
+    <div class="news-item">
+        <h2>教室電燈的派對模式</h2>
+        <p class="date">2024-06-09</p>
+        <p>昨晚，教室電燈自行進入了派對模式，閃爍不止，技術人員正在檢查系統。</p>
+    </div>
+    <div class="news-item">
+        <h2>筆記本電腦的失踪案</h2>
+        <p class="date">2024-06-10</p>
+        <p>有學生報告說筆記本電腦失踪，經查詢發現是被朋友借去寫作業了。</p>
+    </div>
+    <div class="news-item">
+        <h2>黑板上的數學鬼畫符</h2>
+        <p class="date">2024-06-11</p>
+        <p>黑板上經常出現一些奇怪的數學符號，我們懷疑是某位數學天才的傑作。</p>
+    </div>
+    <div class="news-item">
+        <h2>校園內的神秘地洞</h2>
+        <p class="date">2024-06-12</p>
+        <p>校園內出現了一個神秘地洞，經調查是由於舊教室地基問題所致，已經安排修復。</p>
+    </div>
+    <div class="news-item">
+        <h2>教室門鎖的自我修復</h2>
+        <p class="date">2024-06-13</p>
+        <p>有教室的門鎖自動修復了，我們認為是管理員的日常維護起了作用。</p>
+    </div>
+    <div class="news-item">
+        <h2>多功能廳變成了健身房</h2>
+        <p class="date">2024-06-14</p>
+        <p>昨晚多功能廳被臨時改造成健身房，學生們在此進行了一場健身比賽。</p>
+    </div>
+    <div class="news-item">
+        <h2>學生會的幽默演講</h2>
+        <p class="date">2024-06-15</p>
+        <p>學生會舉辦了一場幽默演講比賽，大家笑聲不斷，現場氣氛非常活躍。</p>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+{% endblock %}
